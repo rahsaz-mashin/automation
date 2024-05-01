@@ -14,7 +14,7 @@ import {MssqlQuery} from "../../helpers/mssqlQuery";
 import {initPGDB} from "../../helpers/postgresDB";
 
 
-export class RahsazMSSQL implements INodeType {
+export class RahsazMssql implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'Rahsaz MSSQL',
 		name: 'rahsaz-mssql',
@@ -23,7 +23,7 @@ export class RahsazMSSQL implements INodeType {
 		version: 1,
 		description: 'RahsazMSSQL Methods',
 		defaults: {
-			name: 'RahsazMSSQL'
+			name: 'RahsazMssql'
 		},
 		inputs: ['main'],
 		outputs: ['main'],

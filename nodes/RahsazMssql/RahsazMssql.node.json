@@ -1,5 +1,5 @@
 {
-	"node": "n8n-nodes-base.RahsazMSSQL",
+	"node": "n8n-nodes-base.RahsazMssql",
 	"nodeVersion": "1.0",
 	"codexVersion": "1.0",
 	"categories": [

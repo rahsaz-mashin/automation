@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-rahsaz-automation",
-  "version": "1.0.0",
+  "version": "1.0.7",
   "description": "n8n node for Rahsaz Automation",
   "keywords": ["n8n-community-node-package"],
   "license": "MIT",
@@ -19,8 +19,7 @@
     "dev": "tsc --watch",
     "format": "prettier nodes --write",
     "lint": "eslint nodes package.json",
-    "lintfix": "eslint nodes package.json --fix",
-    "prepublishOnly": "npm run build && npm run lint -c .eslintrc.prepublish.js nodes package.json"
+    "lintfix": "eslint nodes package.json --fix"
   },
   "files": [
     "dist"
@@ -30,7 +29,7 @@
     "credentials": [],
     "nodes": [
       "dist/nodes/RahsazInitializer/RahsazInitializer.node.js",
-      "dist/nodes/RahsazMSSQL/RahsazMSSQL.node.js"
+      "dist/nodes/RahsazMssql/RahsazMssql.node.js"
     ]
   },
   "devDependencies": {
