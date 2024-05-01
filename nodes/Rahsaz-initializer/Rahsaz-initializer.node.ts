@@ -12,17 +12,17 @@ import {initPGDB} from "../../helpers/postgresDB";
 
 export class RahsazInitializer implements INodeType {
 	description: INodeTypeDescription = {
-		displayName: 'RahsazInitializer',
+		displayName: 'Rahsaz Initializer',
 		name: 'rahsaz-initializer',
-		icon: 'file:icon.png',
+		icon: 'file:icon.svg',
 		group: [],
 		version: 1,
 		description: 'RahsazInitializer Methods',
 		defaults: {
-			name: 'RahsazInitializer',
-			color: '#f6891f'
+			name: 'RahsazInitializer'
 		},
 		inputs: ['main'],
+
 		outputs: ['main', 'main', 'main'],
 		outputNames: ['INSERT', 'UPDATE', 'DELETE'],
 		parameterPane: 'wide',
@@ -37,8 +37,8 @@ export class RahsazInitializer implements INodeType {
 		],
 		properties: [
 			{
-				displayName: 'Resource',
-				name: 'resource',
+				displayName: 'Source',
+				name: 'source',
 				type: 'options',
 				default: 'Click',
 				options: [
@@ -51,7 +51,7 @@ export class RahsazInitializer implements INodeType {
 						value: "PayamGostar"
 					},
 				],
-				noDataExpression: false,
+				noDataExpression: true,
 				required: true,
 			},
 			{
@@ -78,18 +78,18 @@ export class RahsazInitializer implements INodeType {
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
 		const postgresCrd = await this.getCredentials('postgres', 0);
 		const items = this.getInputData();
-		const resource = this.getNodeParameter('resource', 0) as string;
+		const source = this.getNodeParameter('source', 0) as string;
 		const table = this.getNodeParameter('table', 0) as string;
 		const _table_ = this.getNodeParameter('_table_', 0) as string;
 
 		const {Id, _ab_cdc_deleted_at} = items[0].json.payload as { Id: string, _ab_cdc_deleted_at: string }
 		let $r = ''
 		let $s = '*'
-		if (resource === "Click") {
+		if (source === "Click") {
 			$r = `"CKName"='${table}' AND "CKId"='${Id}'`
 			$s = `"PGId" as _ID_, "CKId" as ID`
 		}
-		if (resource === "PayamGostar") {
+		if (source === "PayamGostar") {
 			$r = `"PGName"='${table}' AND "PGId"='${Id}'`
 			$s = `"CKId" as _ID_, "PGId" as ID`
 		}
@@ -99,7 +99,7 @@ export class RahsazInitializer implements INodeType {
 		console.log(q, 'query')
 		const relation: Array<any> = await db.query(q)
 		const data = [{
-			source: resource,
+			source: source,
 			ID: relation?.[0]?.id || Id,
 			TABLE: table,
 			_ID_: relation?.[0]?._id_,

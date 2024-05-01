@@ -16,15 +16,14 @@ import {initPGDB} from "../../helpers/postgresDB";
 
 export class RahsazMSSQL implements INodeType {
 	description: INodeTypeDescription = {
-		displayName: 'RahsazMSSQL',
+		displayName: 'Rahsaz MSSQL',
 		name: 'rahsaz-mssql',
-		icon: 'file:icon.png',
+		icon: 'file:icon.svg',
 		group: [],
 		version: 1,
 		description: 'RahsazMSSQL Methods',
 		defaults: {
-			name: 'RahsazMSSQL',
-			color: '#f6891f'
+			name: 'RahsazMSSQL'
 		},
 		inputs: ['main'],
 		outputs: ['main'],
@@ -57,25 +56,21 @@ export class RahsazMSSQL implements INodeType {
 					{
 						name: 'Get',
 						value: 'get',
-						description: 'Get',
 						action: 'Get',
 					},
 					{
 						name: 'Create',
 						value: 'create',
-						description: 'Create',
 						action: 'Create',
 					},
 					{
 						name: 'Update',
 						value: 'update',
-						description: 'Update',
 						action: 'Update',
 					},
 					{
 						name: 'Delete',
 						value: 'delete',
-						description: 'Delete',
 						action: 'Delete',
 					},
 				],
@@ -94,7 +89,7 @@ export class RahsazMSSQL implements INodeType {
 
 			// =========================================> Fields
 			{
-				displayName: 'Id',
+				displayName: 'ID',
 				name: 'Id',
 				type: 'string',
 				required: true,
@@ -179,7 +174,7 @@ export class RahsazMSSQL implements INodeType {
 						]
 					},
 				},
-				default: '',
+				default: {},
 			},
 			{
 				displayName: 'Have Dependencies?',
@@ -242,7 +237,7 @@ export class RahsazMSSQL implements INodeType {
 						]
 					},
 				},
-				default: '',
+				default: {},
 			},
 			{
 				displayName: 'Guid?',
@@ -313,7 +308,7 @@ export class RahsazMSSQL implements INodeType {
 						]
 					},
 				},
-				default: '',
+				default: {},
 			},
 		],
 	};
