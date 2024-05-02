@@ -335,7 +335,7 @@ export class RahsazMssql implements INodeType {
 			TABLE: string,
 			_ID_: string,
 			_TABLE_: string
-		} = items[0].json?.props || items[0].json as any
+		} = items[0].json.props as any
 		let T = resource
 
 		if (!!T) {
