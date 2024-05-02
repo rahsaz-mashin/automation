@@ -365,10 +365,10 @@ export class RahsazMssql implements INodeType {
 				})
 				if (this.getNodeParameter('haveGuid', i) as boolean) {
 					Q.push(`DECLARE @op TABLE (Guid uniqueidentifier);`)
-					Q.push(`INSERT INTO "${T}" (${Object.keys(P).join(", ")}) OUTPUT inserted.Id INTO @op VALUES(${Object.keys(P).map((s) => "'" + P[s] + "'").join(", ")});`)
+					Q.push(`INSERT INTO ${T} (${Object.keys(P).join(", ")}) OUTPUT inserted.Id INTO @op VALUES(${Object.keys(P).map((s) => "'" + P[s] + "'").join(", ")});`)
 					Q.push(`SELECT Guid AS _ID_ FROM @op;`)
 				} else {
-					Q.push(`INSERT INTO "${T}" (${Object.keys(P).join(", ")}) VALUES(${Object.keys(P).map((s) => "'" + P[s] + "'").join(", ")});`)
+					Q.push(`INSERT INTO ${T} (${Object.keys(P).join(", ")}) VALUES(${Object.keys(P).map((s) => "'" + P[s] + "'").join(", ")});`)
 					Q.push(`SELECT SCOPE_IDENTITY() AS _ID_;`)
 				}
 			}
@@ -379,11 +379,11 @@ export class RahsazMssql implements INodeType {
 					P[column] = value
 				})
 				const ID = this.getNodeParameter('Id', i) as string;
-				Q.push(`UPDATE "${T}" SET ${Object.keys(P).map((s) => s + "='" + P[s] + "'").join(", ")} WHERE Id='${ID}';`)
+				Q.push(`UPDATE ${T} SET ${Object.keys(P).map((s) => s + "='" + P[s] + "'").join(", ")} WHERE Id='${ID}';`)
 			}
 			if (operation === 'delete') {
 				const ID = this.getNodeParameter('Id', i) as string;
-				Q.push(`DELETE FROM "${T}" WHERE Id='${ID}';`)
+				Q.push(`DELETE FROM ${T} WHERE Id='${ID}';`)
 			}
 
 			responseData = await MssqlQuery(microsoftSqlCrd, Q.join("\n"))
