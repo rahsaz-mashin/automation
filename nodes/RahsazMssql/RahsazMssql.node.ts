@@ -85,7 +85,7 @@ export class RahsazMssql implements INodeType {
 				default: '',
 				noDataExpression: false,
 				required: true,
-				description: 'Table name of database'
+				description: 'Enter name of the table in database'
 			},
 
 			// =========================================> Fields
@@ -405,7 +405,7 @@ export class RahsazMssql implements INodeType {
 			this.helpers.returnJsonArray(
 				returnData?.[0]
 					?
-					returnData?.[0].map((v: any) => ({...v, props}))
+					(operation === 'create') ? returnData?.[0].map((v: any) => ({props: {...props, ...v}})) : returnData?.[0].map((v: any) => ({...v, props}))
 					:
 					{props}
 			)
