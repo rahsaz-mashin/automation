@@ -85,6 +85,7 @@ export class RahsazMssql implements INodeType {
 				default: '',
 				noDataExpression: false,
 				required: true,
+				description: 'Table name of database'
 			},
 
 			// =========================================> Fields
