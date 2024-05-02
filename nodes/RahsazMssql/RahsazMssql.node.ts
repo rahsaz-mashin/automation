@@ -389,6 +389,10 @@ export class RahsazMssql implements INodeType {
 
 			responseData = await MssqlQuery(microsoftSqlCrd, Q.join("\n"))
 
+			if(operation === 'get' && (!responseData || !responseData.length)) {
+				return [[{json: {}}]];
+			}
+
 
 			// ==========================================> haveDependency
 			if (operation === 'get' && this.getNodeParameter('haveDependency', i) as boolean && !!responseData && !!responseData.length) {
@@ -397,12 +401,11 @@ export class RahsazMssql implements INodeType {
 			}
 
 
+			returnData.push(responseData as any);
+
 			if (operation === 'create') {
 				returnData[0] = returnData[0].map((v: any) => ({props: {...props, ...v}}))
 			}
-
-
-			returnData.push(responseData as any);
 		}
 		// }
 
