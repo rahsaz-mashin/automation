@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-rahsaz-automation",
-  "version": "1.2.5",
+  "version": "1.3",
   "description": "n8n node for Rahsaz Automation",
   "keywords": ["n8n-community-node-package"],
   "license": "MIT",
@@ -29,7 +29,8 @@
     "credentials": [],
     "nodes": [
       "dist/nodes/RahsazInitializer/RahsazInitializer.node.js",
-      "dist/nodes/RahsazMssql/RahsazMssql.node.js"
+      "dist/nodes/RahsazMssql/RahsazMssql.node.js",
+      "dist/nodes/RahsazTelegram/RahsazTelegram.node.js",
     ]
   },
   "devDependencies": {
