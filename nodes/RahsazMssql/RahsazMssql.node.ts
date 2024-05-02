@@ -79,7 +79,7 @@ export class RahsazMssql implements INodeType {
 				required: true,
 			},
 			{
-				displayName: 'Resource',
+				displayName: 'Table',
 				name: 'resource',
 				type: 'string',
 				default: '',
