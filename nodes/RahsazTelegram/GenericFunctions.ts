@@ -4,7 +4,7 @@ import type {
 	IHookFunctions,
 	IHttpRequestMethods,
 	ILoadOptionsFunctions,
-	IRequestOptions,
+	IHttpRequestOptions,
 	IWebhookFunctions,
 	JsonObject,
 } from 'n8n-workflow';
@@ -199,10 +199,10 @@ export async function apiRequest(
 
 	query = query || {};
 
-	const options: IRequestOptions = {
+	const options: IHttpRequestOptions = {
 		headers: {},
 		method,
-		uri: `https://api.telegram.org/bot${credentials.accessToken}/${endpoint}`,
+		url: `https://rahsaz-tlg.ramous.workers.dev/bot${credentials.accessToken}/${endpoint}`,
 		body,
 		qs: query,
 		json: true,

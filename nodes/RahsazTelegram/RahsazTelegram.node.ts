@@ -8,15 +8,16 @@ import type {
 	INodeTypeDescription,
 	IHttpRequestMethods,
 } from 'n8n-workflow';
+// @ts-ignore
 import { BINARY_ENCODING, NodeOperationError } from 'n8n-workflow';
 
 import { addAdditionalFields, apiRequest, getPropertyName } from './GenericFunctions';
 
-export class Telegram implements INodeType {
+export class RahsazTelegram implements INodeType {
 	description: INodeTypeDescription = {
-		displayName: 'Telegram',
+		displayName: 'Rahsaz Telegram',
 		name: 'telegram',
-		icon: 'file:telegram.svg',
+		icon: 'file:icon.svg',
 		group: ['output'],
 		version: [1, 1.1, 1.2],
 		subtitle: '={{$parameter["operation"] + ": " + $parameter["resource"]}}',
@@ -1718,6 +1719,7 @@ export class Telegram implements INodeType {
 		const binaryData = this.getNodeParameter('binaryData', 0, false);
 
 		const nodeVersion = this.getNode().typeVersion;
+		// @ts-ignore
 		const instanceId = this.getInstanceId();
 
 		for (let i = 0; i < items.length; i++) {
@@ -2013,6 +2015,7 @@ export class Telegram implements INodeType {
 
 				if (binaryData) {
 					const binaryPropertyName = this.getNodeParameter('binaryPropertyName', 0);
+					// @ts-ignore
 					const itemBinaryData = items[i].binary![binaryPropertyName];
 					const propertyName = getPropertyName(operation);
 					const fileName = this.getNodeParameter('additionalFields.fileName', 0, '') as string;
@@ -2032,6 +2035,7 @@ export class Telegram implements INodeType {
 
 					let uploadData: Buffer | Readable;
 					if (itemBinaryData.id) {
+						// @ts-ignore
 						uploadData = await this.helpers.getBinaryStream(itemBinaryData.id);
 					} else {
 						uploadData = Buffer.from(itemBinaryData.data, BINARY_ENCODING);
@@ -2067,7 +2071,7 @@ export class Telegram implements INodeType {
 							{
 								json: false,
 								encoding: null,
-								uri: `https://api.telegram.org/file/bot${credentials.accessToken}/${filePath}`,
+								uri: `https://rahsaz-tlg.ramous.workers.dev/file/bot${credentials.accessToken}/${filePath}`,
 								resolveWithFullResponse: true,
 								useStream: true,
 							},

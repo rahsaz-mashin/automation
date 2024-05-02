@@ -25,6 +25,7 @@ export class RahsazMssql implements INodeType {
 		defaults: {
 			name: 'RahsazMssql'
 		},
+		subtitle: '={{$parameter["operation"] + " > " + $parameter["resource"]}}',
 		inputs: ['main'],
 		outputs: ['main'],
 		credentials: [
@@ -40,9 +41,6 @@ export class RahsazMssql implements INodeType {
 				required: true,
 				displayOptions: {
 					show: {
-						// haveDependency: [
-						// 	true
-						// ]
 					}
 				}
 			},

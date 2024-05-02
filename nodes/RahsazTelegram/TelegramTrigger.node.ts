@@ -293,7 +293,7 @@ export class TelegramTrigger implements INodeType {
 					{
 						json: false,
 						encoding: null,
-						uri: `https://api.telegram.org/file/bot${credentials.accessToken}/${file_path}`,
+						uri: `https://rahsaz-tlg.ramous.workers.dev/file/bot${credentials.accessToken}/${file_path}`,
 						resolveWithFullResponse: true,
 					},
 				);

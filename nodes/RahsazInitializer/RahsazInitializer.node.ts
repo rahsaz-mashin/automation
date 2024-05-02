@@ -21,8 +21,8 @@ export class RahsazInitializer implements INodeType {
 		defaults: {
 			name: 'RahsazInitializer'
 		},
+		subtitle: '={{$parameter["source"] + " > " + $parameter["table"]}}',
 		inputs: ['main'],
-
 		outputs: ['main', 'main', 'main'],
 		outputNames: ['INSERT', 'UPDATE', 'DELETE'],
 		parameterPane: 'wide',
