@@ -95,7 +95,7 @@ export class RahsazInitializer implements INodeType {
 		}
 
 		const {db} = await initPGDB(postgresCrd)
-		const q = `SELECT ${$s} FROM "click ⇌ payamgostar".relation WHERE ${$r}`
+		const q = `SELECT ${$s} FROM public.ck_pg WHERE ${$r}`
 		console.log(q, 'query')
 		const relation: Array<any> = await db.query(q)
 		const data = [{

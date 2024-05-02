@@ -437,7 +437,7 @@ const getDependencies = async (dp, postgresCrd, props, responseData) => {
 				$r = `"PGName"='${table}' AND "PGId"='${responseData?.[0]?.[field]}'`
 				$s = `"CKId" as _ID_`
 			}
-			const q = `SELECT ${$s} FROM "click ⇌ payamgostar".relation WHERE ${$r}`
+			const q = `SELECT ${$s} FROM public.ck_pg WHERE ${$r}`
 			dependencies[field] = await getDependencyValue(db, q, field, force)
 		}
 		responseData[0] = {...responseData[0], dependencies}
