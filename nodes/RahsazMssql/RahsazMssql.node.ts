@@ -8,8 +8,8 @@ import {
 	INodeType,
 	INodeTypeDescription,
 } from 'n8n-workflow';
-import { IDatabase } from 'pg-promise';
-import { IClient } from 'pg-promise/typescript/pg-subset';
+import {IDatabase} from 'pg-promise';
+import {IClient} from 'pg-promise/typescript/pg-subset';
 import {MssqlQuery} from "../../helpers/mssqlQuery";
 import {initPGDB} from "../../helpers/postgresDB";
 
@@ -320,7 +320,7 @@ export class RahsazMssql implements INodeType {
 		const items = this.getInputData();
 		let Q = []
 		let responseData: IRecordSet<any>;
-		const returnData = [];
+		const returnData: any[] = [];
 		const microsoftSqlCrd = await this.getCredentials('microsoftSql', 0);
 		const postgresCrd = await this.getCredentials('postgres', 0);
 		const resource = this.getNodeParameter('resource', 0) as string;
@@ -397,6 +397,11 @@ export class RahsazMssql implements INodeType {
 			}
 
 
+			if (operation === 'create') {
+				returnData[0] = returnData[0].map((v: any) => ({props: {...props, ...v}}))
+			}
+
+
 			returnData.push(responseData as any);
 		}
 		// }
@@ -405,7 +410,7 @@ export class RahsazMssql implements INodeType {
 			this.helpers.returnJsonArray(
 				returnData?.[0]
 					?
-					(operation === 'create') ? returnData?.[0].map((v: any) => ({props: {...props, ...v}})) : returnData?.[0].map((v: any) => ({...v, props}))
+					returnData[0].map((v: any) => ({...v, props}))
 					:
 					{props}
 			)
@@ -415,9 +420,6 @@ export class RahsazMssql implements INodeType {
 
 
 }
-
-
-
 
 
 // @ts-ignore
@@ -448,7 +450,7 @@ const getDependencies = async (dp, postgresCrd, props, responseData) => {
 
 
 const getDependencyValue = async (db: IDatabase<{}, IClient>, q: string, field: string, isForce: boolean): Promise<string | null> => {
-	let value: string | null  = null
+	let value: string | null = null
 	const dpnc: Array<any> = await db.query(q)
 	if (!!dpnc?.length) {
 		value = dpnc[0]['_id_']

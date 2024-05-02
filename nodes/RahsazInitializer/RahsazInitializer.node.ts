@@ -99,11 +99,13 @@ export class RahsazInitializer implements INodeType {
 		console.log(q, 'query')
 		const relation: Array<any> = await db.query(q)
 		const data = [{
-			source: source,
-			ID: relation?.[0]?.id || Id,
-			TABLE: table,
-			_ID_: relation?.[0]?._id_,
-			_TABLE_: _table_,
+			props: {
+				source: source,
+				ID: relation?.[0]?.id || Id,
+				TABLE: table,
+				_ID_: relation?.[0]?._id_,
+				_TABLE_: _table_,
+			}
 		}]
 
 
