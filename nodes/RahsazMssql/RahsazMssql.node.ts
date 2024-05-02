@@ -329,7 +329,7 @@ export class RahsazMssql implements INodeType {
 
 		// for (let i = 0; i < items.length; i++) {
 		let i = 0
-		const props: {
+		let props: {
 			source: string,
 			ID: string,
 			TABLE: string,
@@ -389,7 +389,7 @@ export class RahsazMssql implements INodeType {
 
 			responseData = await MssqlQuery(microsoftSqlCrd, Q.join("\n"))
 
-			if(operation === 'get' && (!responseData || !responseData.length)) {
+			if (operation === 'get' && (!responseData || !responseData.length)) {
 				return [[]];
 			}
 
@@ -403,17 +403,16 @@ export class RahsazMssql implements INodeType {
 
 			returnData.push(responseData as any);
 
-			if (operation === 'create') {
-				returnData[0] = returnData[0].map((v: any) => ({props: {...props, ...v}}))
-			}
 		}
 		// }
-
+		// console.log(returnData, returnData[0][0], "---")
 		if (merge) return [
 			this.helpers.returnJsonArray(
 				returnData?.[0]
 					?
-					returnData[0].map((v: any) => ({...v, props}))
+					returnData[0].map((v: any) => (
+						(operation === 'create' ? {props: {...props, ...v}} : {...v, props})
+					))
 					:
 					{props}
 			)
