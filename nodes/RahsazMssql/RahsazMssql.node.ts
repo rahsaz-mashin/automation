@@ -390,7 +390,7 @@ export class RahsazMssql implements INodeType {
 			responseData = await MssqlQuery(microsoftSqlCrd, Q.join("\n"))
 
 			if(operation === 'get' && (!responseData || !responseData.length)) {
-				return [[{json: {}}]];
+				return [[]];
 			}
 
 
