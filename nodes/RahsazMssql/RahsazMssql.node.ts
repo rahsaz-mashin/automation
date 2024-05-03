@@ -25,7 +25,7 @@ export class RahsazMssql implements INodeType {
 		defaults: {
 			name: 'RahsazMssql'
 		},
-		subtitle: '={{$parameter["operation"] + " > " + $parameter["source"] + "." + $parameter["table"]}}',
+		subtitle: '={{$parameter["operation"] + " > " + $parameter["primary"] + "." + $parameter["table"]}}',
 		inputs: ['main'],
 		outputs: ['main'],
 		credentials: [
