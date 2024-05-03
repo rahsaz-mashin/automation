@@ -364,7 +364,7 @@ export class RahsazMssql implements INodeType {
 				})
 				if (this.getNodeParameter('haveGuid', i) as boolean) {
 					Q.push(`DECLARE @op TABLE (Guid uniqueidentifier);`)
-					Q.push(`INSERT INTO ${T} (${Object.keys(P).join(", ")}) OUTPUT inserted.Id INTO @op VALUES(${Object.keys(P).map((s) => "'" + P[s] + "'").join(", ")});`)
+					Q.push(`INSERT INTO ${T} (${Object.keys(P).join(", ")}) OUTPUT inserted.Id INTO @op VALUES(${Object.keys(P).map((s) => (P[s]==='NEWID()' ? "NEWID()" :"'" + P[s] + "'")).join(", ")});`)
 					Q.push(`SELECT Guid AS _ID_ FROM @op;`)
 				} else {
 					Q.push(`INSERT INTO ${T} (${Object.keys(P).join(", ")}) VALUES(${Object.keys(P).map((s) => "'" + P[s] + "'").join(", ")});`)
