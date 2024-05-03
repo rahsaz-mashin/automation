@@ -83,8 +83,8 @@ export class RahsazMssql implements INodeType {
 				required: true,
 			},
 			{
-				displayName: 'Source',
-				name: 'source',
+				displayName: 'Primary',
+				name: 'primary',
 				type: 'options',
 				default: 'Click',
 				options: [
@@ -384,17 +384,17 @@ export class RahsazMssql implements INodeType {
 		let responseData: IRecordSet<any>;
 		const returnData: any[] = [];
 		const clickSqlCrd = await this.getCredentials('mssqlClick', 0);
-		const payamgostarSqlCrd = await this.getCredentials('mssqlPayamGostar', 1);
+		const payamgostarSqlCrd = await this.getCredentials('mssqlPayamGostar', 0);
 		const postgresCrd = await this.getCredentials('postgres', 0);
 
 		//
 		const operation = this.getNodeParameter('operation', 0) as string;
-		const source = this.getNodeParameter('source', 0) as string;
+		const _primary = this.getNodeParameter('primary', 0) as string;
 		const table = this.getNodeParameter('table', 0) as string;
 		const merge = this.getNodeParameter('merge', 0) as boolean;
 
-		const primaryCrd = (source === "Click" ? clickSqlCrd : payamgostarSqlCrd)
-		const secondaryCrd = (source === "Click" ? payamgostarSqlCrd : clickSqlCrd)
+		const primaryCrd = (_primary === "Click" ? clickSqlCrd : payamgostarSqlCrd)
+		const secondaryCrd = (_primary === "Click" ? payamgostarSqlCrd : clickSqlCrd)
 		// for (let i = 0; i < items.length; i++) {
 		let i = 0
 		let props: {
