@@ -11,7 +11,7 @@ import { apiRequest, getImageBySize, getSecretToken } from './GenericFunctions';
 
 import type { IEvent } from './IEvent';
 
-export class TelegramTrigger implements INodeType {
+export class RahsazTelegramTrigger implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'Telegram Trigger',
 		name: 'telegramTrigger',

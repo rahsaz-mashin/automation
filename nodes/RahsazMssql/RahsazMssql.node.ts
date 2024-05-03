@@ -25,12 +25,19 @@ export class RahsazMssql implements INodeType {
 		defaults: {
 			name: 'RahsazMssql'
 		},
-		subtitle: '={{$parameter["operation"] + " > " + $parameter["resource"]}}',
+		subtitle: '={{$parameter["operation"] + " > " + $parameter["source"] + "." + $parameter["table"]}}',
 		inputs: ['main'],
 		outputs: ['main'],
 		credentials: [
 			{
-				name: 'microsoftSql',
+				name: 'mssqlClick',
+				required: true,
+				displayOptions: {
+					show: {}
+				}
+			},
+			{
+				name: 'mssqlPayamGostar',
 				required: true,
 				displayOptions: {
 					show: {}
@@ -40,8 +47,7 @@ export class RahsazMssql implements INodeType {
 				name: 'postgres',
 				required: true,
 				displayOptions: {
-					show: {
-					}
+					show: {}
 				}
 			},
 		],
@@ -77,8 +83,26 @@ export class RahsazMssql implements INodeType {
 				required: true,
 			},
 			{
+				displayName: 'Source',
+				name: 'source',
+				type: 'options',
+				default: 'Click',
+				options: [
+					{
+						name: "Click",
+						value: "Click"
+					},
+					{
+						name: "PayamGostar",
+						value: "PayamGostar"
+					},
+				],
+				noDataExpression: true,
+				required: true,
+			},
+			{
 				displayName: 'Table',
-				name: 'resource',
+				name: 'table',
 				type: 'string',
 				default: '',
 				noDataExpression: false,
@@ -208,6 +232,7 @@ export class RahsazMssql implements INodeType {
 								type: 'string',
 								default: '',
 								required: true,
+								description: 'Table name in source (for find relation in postgres)',
 							},
 							{
 								displayName: 'Field',
@@ -215,6 +240,7 @@ export class RahsazMssql implements INodeType {
 								type: 'string',
 								default: '',
 								required: true,
+								description: 'Field name in source',
 							},
 							{
 								displayName: 'Force',
@@ -223,6 +249,44 @@ export class RahsazMssql implements INodeType {
 								default: true,
 								required: true,
 							},
+							{
+								displayName: 'Need other fields in destination?',
+								name: 'need_other_fields',
+								type: 'boolean',
+								default: false,
+								required: true,
+							},
+							{
+								displayName: 'Destination Table',
+								name: 'destination_table',
+								type: 'string',
+								default: '',
+								required: false,
+								description: 'Table name in destination',
+								displayOptions: {
+									show: {
+										need_other_fields: [
+											true
+										]
+									}
+								}
+							},
+							{
+								displayName: 'Fields you want from destination (Guid,Name,...)',
+								name: 'destination_fields',
+								type: 'string',
+								default: '',
+								required: false,
+								description: 'Fields name in table of destination. separate by comma(,). if Nothing leave it blank',
+								displayOptions: {
+									show: {
+										need_other_fields: [
+											true
+										]
+									}
+								}
+							},
+
 						],
 					},
 				],
@@ -319,12 +383,18 @@ export class RahsazMssql implements INodeType {
 		let Q = []
 		let responseData: IRecordSet<any>;
 		const returnData: any[] = [];
-		const microsoftSqlCrd = await this.getCredentials('microsoftSql', 0);
+		const clickSqlCrd = await this.getCredentials('mssqlClick', 0);
+		const payamgostarSqlCrd = await this.getCredentials('mssqlPayamGostar', 1);
 		const postgresCrd = await this.getCredentials('postgres', 0);
-		const resource = this.getNodeParameter('resource', 0) as string;
+
+		//
 		const operation = this.getNodeParameter('operation', 0) as string;
+		const source = this.getNodeParameter('source', 0) as string;
+		const table = this.getNodeParameter('table', 0) as string;
 		const merge = this.getNodeParameter('merge', 0) as boolean;
 
+		const primaryCrd = (source === "Click" ? clickSqlCrd : payamgostarSqlCrd)
+		const secondaryCrd = (source === "Click" ? payamgostarSqlCrd : clickSqlCrd)
 		// for (let i = 0; i < items.length; i++) {
 		let i = 0
 		let props: {
@@ -334,7 +404,7 @@ export class RahsazMssql implements INodeType {
 			_ID_: string,
 			_TABLE_: string
 		} = items[0].json.props as any
-		let T = resource
+		let T = table
 
 		if (!!T) {
 			if (operation === 'get') {
@@ -385,7 +455,7 @@ export class RahsazMssql implements INodeType {
 				Q.push(`DELETE FROM ${T} WHERE Id='${ID}';`)
 			}
 
-			responseData = await MssqlQuery(microsoftSqlCrd, Q.join("\n"))
+			responseData = await MssqlQuery(primaryCrd, Q.join("\n"))
 
 			if (operation === 'get' && (!responseData || !responseData.length)) {
 				return [[]];
@@ -395,7 +465,7 @@ export class RahsazMssql implements INodeType {
 			// ==========================================> haveDependency
 			if (operation === 'get' && this.getNodeParameter('haveDependency', i) as boolean && !!responseData && !!responseData.length) {
 				const dp = this.getNodeParameter('dependencies', i) as { dependencies_data: Array<any> }
-				responseData = await getDependencies(dp, postgresCrd, props, responseData)
+				responseData = await getDependencies(dp, postgresCrd, props, responseData, secondaryCrd)
 			}
 
 
@@ -423,12 +493,12 @@ export class RahsazMssql implements INodeType {
 
 
 // @ts-ignore
-const getDependencies = async (dp, postgresCrd, props, responseData) => {
+const getDependencies = async (dp, postgresCrd, props, responseData, secondaryCrd) => {
 	return new Promise<IRecordSet<any>>(async (resolve, reject) => {
 		const {db} = await initPGDB(postgresCrd)
 		let dependencies: any = {}
 		for (let i = 0; i < dp['dependencies_data'].length; i++) {
-			const {table, field, force} = dp['dependencies_data'][i]
+			const {table, field, force, need_other_fields, destination_table, destination_fields} = dp['dependencies_data'][i]
 
 			let $r = ''
 			let $s = '*'
@@ -441,7 +511,7 @@ const getDependencies = async (dp, postgresCrd, props, responseData) => {
 				$s = `"CKId" as _ID_`
 			}
 			const q = `SELECT ${$s} FROM public.ck_pg WHERE ${$r}`
-			dependencies[field] = await getDependencyValue(db, q, field, force)
+			dependencies[field] = await getDependencyValue(db, q, field, force, secondaryCrd, need_other_fields, destination_table, destination_fields)
 		}
 		responseData[0] = {...responseData[0], dependencies}
 		return resolve(responseData)
@@ -449,18 +519,25 @@ const getDependencies = async (dp, postgresCrd, props, responseData) => {
 }
 
 
-const getDependencyValue = async (db: IDatabase<{}, IClient>, q: string, field: string, isForce: boolean): Promise<string | null> => {
+const getDependencyValue = async (db: IDatabase<{}, IClient>, q: string, field: string, isForce: boolean, secondaryCrd: any, need_other_fields: boolean, destination_table?: string | null, destination_fields?: string | null): Promise<string | null> => {
+	console.log(secondaryCrd)
+
 	let value: string | null = null
 	const dpnc: Array<any> = await db.query(q)
 	if (!!dpnc?.length) {
 		value = dpnc[0]['_id_']
+		if (need_other_fields && !!destination_table && !!destination_fields) {
+			const Q = `SELECT ${destination_fields} FROM ${destination_table} WHERE Id='${value}'`
+			const result = await MssqlQuery(secondaryCrd, Q)
+			value = result[0]
+		}
 	} else {
 		console.log(field, "Can't Find")
 		if (isForce) {
 			console.log(field, "Force to Find, wait and run again")
 			value = await new Promise<string | null>((resolve, reject) => {
 				setTimeout(async () => {
-					value = await getDependencyValue(db, q, field, isForce)
+					value = await getDependencyValue(db, q, field, isForce, secondaryCrd, need_other_fields, destination_table, destination_fields)
 					return resolve(value)
 				}, 10000)
 			})
