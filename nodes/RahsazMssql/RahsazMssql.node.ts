@@ -512,6 +512,10 @@ const getDependencies = async (dp, postgresCrd, props, responseData, secondaryCr
 		for (let i = 0; i < dp['dependencies_data'].length; i++) {
 			const {table, field, force, need_other_fields, destination_table, destination_fields} = dp['dependencies_data'][i]
 
+			if(!responseData?.[0]?.[field]) {
+				dependencies[field] = null
+				continue
+			}
 			let $r = ''
 			let $s = '*'
 			if (props.source === "Click") {
