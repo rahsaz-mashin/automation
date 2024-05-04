@@ -1,6 +1,7 @@
 import {
 	IExecuteFunctions,
 } from 'n8n-core';
+import set from 'lodash/set';
 
 import {
 	INodeExecutionData,
@@ -71,6 +72,65 @@ export class RahsazInitializer implements INodeType {
 				required: true,
 			},
 			{
+				displayName: 'Filter data?',
+				name: 'haveFilter',
+				type: 'boolean',
+				required: true,
+				default: false,
+			},
+			{
+				displayName: 'Filters',
+				name: 'filters',
+				placeholder: 'Add condition',
+				// @ts-ignore
+				type: 'filter',
+				default: {},
+				typeOptions: {
+					filter: {
+						// Use the user options (below) to determine filter behavior
+						caseSensitive: '={{!$parameter.filter_options.ignoreCase}}',
+						typeValidation: '={{$parameter.filter_options.looseTypeValidation ? "loose" : "strict"}}',
+					},
+				},
+				displayOptions: {
+					show: {
+						haveFilter: [
+							true
+						],
+					},
+				},
+			},
+			{
+				displayName: 'Filter Options',
+				name: 'filter_options',
+				type: 'collection',
+				placeholder: 'Add option',
+				default: {},
+				options: [
+					{
+						displayName: 'Ignore Case',
+						description: 'Whether to ignore letter case when evaluating conditions',
+						name: 'ignoreCase',
+						type: 'boolean',
+						default: true,
+					},
+					{
+						displayName: 'Less Strict Type Validation',
+						description: 'Whether to try casting value types based on the selected operator',
+						name: 'looseTypeValidation',
+						type: 'boolean',
+						default: true,
+					},
+				],
+				displayOptions: {
+					show: {
+						haveFilter: [
+							true
+						],
+					},
+				},
+			},
+			{
 				displayName: 'Output Fields',
 				description: 'Type fields that you want to returned from airbyte (separate by comma)',
 				name: 'fields',
@@ -78,7 +138,7 @@ export class RahsazInitializer implements INodeType {
 				default: '',
 				noDataExpression: false,
 				required: false,
-			},
+			}
 		],
 	};
 
@@ -86,13 +146,60 @@ export class RahsazInitializer implements INodeType {
 	// The execute method will go here
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
 		const postgresCrd = await this.getCredentials('postgres', 0);
-		const items = this.getInputData();
 		const source = this.getNodeParameter('source', 0) as string;
 		const table = this.getNodeParameter('table', 0) as string;
 		const _table_ = this.getNodeParameter('_table_', 0) as string;
 		const fields = this.getNodeParameter('fields', 0) as string;
+		const haveFilter = this.getNodeParameter('haveFilter', 0) as boolean;
 
-		const {Id, _ab_cdc_deleted_at, ...others} = items[0].json.payload as {
+		const keptItems: INodeExecutionData[] = [];
+		const discardedItems: INodeExecutionData[] = [];
+		if(haveFilter) {
+
+			this.getInputData().forEach((item, itemIndex) => {
+				try {
+					const options = this.getNodeParameter('filter_options', itemIndex) as {
+						ignoreCase?: boolean;
+						looseTypeValidation?: boolean;
+					};
+					let pass = false;
+					try {
+						pass = this.getNodeParameter('filters', itemIndex, false, {
+							extractValue: true,
+						}) as boolean;
+					} catch (error) {
+						if (!options.looseTypeValidation) {
+							set(
+								error,
+								'description',
+								"Try changing the type of comparison. Alternatively you can enable 'Less Strict Type Validation' in the options.",
+							);
+						}
+						set(error, 'context.itemIndex', itemIndex);
+						set(error, 'node', this.getNode());
+						throw error;
+					}
+
+					if (item.pairedItem === undefined) {
+						item.pairedItem = { item: itemIndex };
+					}
+
+					if (pass) {
+						keptItems.push(item);
+					} else {
+						discardedItems.push(item);
+					}
+				} catch (error) {
+					if (this.continueOnFail()) {
+						discardedItems.push(item);
+					} else {
+						throw error;
+					}
+				}
+			});
+		}
+
+		const {Id, _ab_cdc_deleted_at, ...others} = keptItems[0].json.payload as {
 			Id: string,
 			_ab_cdc_deleted_at: string,
 			others: any

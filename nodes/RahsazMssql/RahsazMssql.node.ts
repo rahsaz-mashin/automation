@@ -149,6 +149,7 @@ export class RahsazMssql implements INodeType {
 				typeOptions: {
 					multipleValues: true,
 				},
+				placeholder: 'Add relation',
 				options: [
 					{
 						name: 'relations_data',
@@ -221,6 +222,7 @@ export class RahsazMssql implements INodeType {
 				typeOptions: {
 					multipleValues: true,
 				},
+				placeholder: 'Add dependency',
 				options: [
 					{
 						name: 'dependencies_data',
@@ -341,6 +343,7 @@ export class RahsazMssql implements INodeType {
 				typeOptions: {
 					multipleValues: true,
 				},
+				placeholder: 'Add field',
 				options: [
 					{
 						name: 'fields_data',
