@@ -170,6 +170,13 @@ export class RahsazMssql implements INodeType {
 								required: true,
 							},
 							{
+								displayName: 'Rename Table',
+								name: 'rename_table',
+								type: 'string',
+								default: '',
+								required: false,
+							},
+							{
 								displayName: 'Table Query Column',
 								description: 'That column that you query with',
 								name: 'tField',
@@ -415,14 +422,14 @@ export class RahsazMssql implements INodeType {
 				if (this.getNodeParameter('haveRelation', i) as boolean) {
 					const r = this.getNodeParameter('relations', i) as { relations_data: Array<any> }
 					let fields = [`${T}.*`]
-					r['relations_data'].map(({table, oField}: { table: string, oField: string }) => {
+					r['relations_data'].map(({table, oField, rename_table}: { table: string, oField: string, rename_table?: string }) => {
 						oField.split(",").map((o) => {
-							fields.push(`${table}.${o} as ${table}${o}`)
+							fields.push(`${rename_table ? rename_table : table}.${o} as ${rename_table ? rename_table : table}${o}`)
 						})
 					})
 					Q.push(`SELECT ${fields.join(",")} FROM ${T}`)
-					r['relations_data'].map(({field, table, tField}) => {
-						Q.push(`INNER JOIN ${table} ON ${T}.${field} = ${table}.${tField}`)
+					r['relations_data'].map(({field, table, tField, rename_table}) => {
+						Q.push(`INNER JOIN ${table}${rename_table ? ` ${rename_table}` : ''} ON ${T}.${field} = ${rename_table ? rename_table : table}.${tField}`)
 					})
 					Q.push(`WHERE ${T}.Id='${ID}'`)
 				} else {
@@ -457,6 +464,8 @@ export class RahsazMssql implements INodeType {
 				const ID = this.getNodeParameter('Id', i) as string;
 				Q.push(`DELETE FROM ${T} WHERE Id='${ID}';`)
 			}
+
+			console.log("Query:", Q)
 
 			responseData = await MssqlQuery(primaryCrd, Q.join("\n"))
 
