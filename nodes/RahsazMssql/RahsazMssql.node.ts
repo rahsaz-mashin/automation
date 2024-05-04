@@ -422,7 +422,11 @@ export class RahsazMssql implements INodeType {
 				if (this.getNodeParameter('haveRelation', i) as boolean) {
 					const r = this.getNodeParameter('relations', i) as { relations_data: Array<any> }
 					let fields = [`${T}.*`]
-					r['relations_data'].map(({table, oField, rename_table}: { table: string, oField: string, rename_table?: string }) => {
+					r['relations_data'].map(({table, oField, rename_table}: {
+						table: string,
+						oField: string,
+						rename_table?: string
+					}) => {
 						oField.split(",").map((o) => {
 							fields.push(`${rename_table ? rename_table : table}.${o} as ${rename_table ? rename_table : table}${o}`)
 						})
@@ -444,10 +448,10 @@ export class RahsazMssql implements INodeType {
 				})
 				if (this.getNodeParameter('haveGuid', i) as boolean) {
 					Q.push(`DECLARE @op TABLE (Guid uniqueidentifier);`)
-					Q.push(`INSERT INTO ${T} (${Object.keys(P).join(", ")}) OUTPUT inserted.Id INTO @op VALUES(${Object.keys(P).map((s) => (['NEWID()', null].includes(P[s]) ? P[s] : "'" + P[s] + "'")).join(", ")});`)
+					Q.push(`INSERT INTO ${T} (${Object.keys(P).join(", ")}) OUTPUT inserted.Id INTO @op VALUES(${Object.keys(P).map((s) => setVal(P[s])).join(", ")});`)
 					Q.push(`SELECT Guid AS _ID_ FROM @op;`)
 				} else {
-					Q.push(`INSERT INTO ${T} (${Object.keys(P).join(", ")}) VALUES(${Object.keys(P).map((s) => (['NEWID()', null].includes(P[s]) ? P[s] : "'" + P[s] + "'")).join(", ")});`)
+					Q.push(`INSERT INTO ${T} (${Object.keys(P).join(", ")}) VALUES(${Object.keys(P).map((s) => (setVal(P[s]))).join(", ")});`)
 					Q.push(`SELECT SCOPE_IDENTITY() AS _ID_;`)
 				}
 			}
@@ -458,7 +462,7 @@ export class RahsazMssql implements INodeType {
 					P[column] = value
 				})
 				const ID = this.getNodeParameter('Id', i) as string;
-				Q.push(`UPDATE ${T} SET ${Object.keys(P).map((s) => s + "='" + P[s] + "'").join(", ")} WHERE Id='${ID}';`)
+				Q.push(`UPDATE ${T} SET ${Object.keys(P).map((s) => s + "=" + setVal(P[s])).join(", ")} WHERE Id='${ID}';`)
 			}
 			if (operation === 'delete') {
 				const ID = this.getNodeParameter('Id', i) as string;
@@ -504,6 +508,13 @@ export class RahsazMssql implements INodeType {
 }
 
 
+const setVal = (val: any) => {
+	if (!val) return null
+	if (val === 'NEWID()' || val === 'NEWID') return "NEWID()"
+	return `'${val}'`
+}
+
+
 // @ts-ignore
 const getDependencies = async (dp, postgresCrd, props, responseData, secondaryCrd) => {
 	return new Promise<IRecordSet<any>>(async (resolve, reject) => {
@@ -512,7 +523,7 @@ const getDependencies = async (dp, postgresCrd, props, responseData, secondaryCr
 		for (let i = 0; i < dp['dependencies_data'].length; i++) {
 			const {table, field, force, need_other_fields, destination_table, destination_fields} = dp['dependencies_data'][i]
 
-			if(!responseData?.[0]?.[field]) {
+			if (!responseData?.[0]?.[field]) {
 				dependencies[field] = null
 				continue
 			}
