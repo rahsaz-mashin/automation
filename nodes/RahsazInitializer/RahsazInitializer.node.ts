@@ -70,6 +70,15 @@ export class RahsazInitializer implements INodeType {
 				noDataExpression: false,
 				required: true,
 			},
+			{
+				displayName: 'Output Fields',
+				description: 'Type fields that you want to returned from airbyte (separate by comma)',
+				name: 'fields',
+				type: 'string',
+				default: '',
+				noDataExpression: false,
+				required: true,
+			},
 		],
 	};
 
@@ -81,8 +90,9 @@ export class RahsazInitializer implements INodeType {
 		const source = this.getNodeParameter('source', 0) as string;
 		const table = this.getNodeParameter('table', 0) as string;
 		const _table_ = this.getNodeParameter('_table_', 0) as string;
+		const fields = this.getNodeParameter('fields', 0) as string;
 
-		const {Id, _ab_cdc_deleted_at} = items[0].json.payload as { Id: string, _ab_cdc_deleted_at: string }
+		const {Id, _ab_cdc_deleted_at, ...others} = items[0].json.payload as { Id: string, _ab_cdc_deleted_at: string, others: any }
 		let $r = ''
 		let $s = '*'
 		if (source === "Click") {
@@ -92,6 +102,14 @@ export class RahsazInitializer implements INodeType {
 		if (source === "PayamGostar") {
 			$r = `"PGName"='${table}' AND "PGId"='${Id}'`
 			$s = `"CKId" as _ID_, "PGId" as ID`
+		}
+
+		let yfields: any = {}
+		const fy = fields.split(",")
+		for (let i = 0; i < fy.length; i++) {
+			fy[i]
+			// @ts-ignore
+			yfields[fy[i]] = others[fy[i]]
 		}
 
 		const {db} = await initPGDB(postgresCrd)
@@ -105,6 +123,7 @@ export class RahsazInitializer implements INodeType {
 				TABLE: table,
 				_ID_: relation?.[0]?._id_,
 				_TABLE_: _table_,
+				...yfields
 			}
 		}]
 
@@ -120,7 +139,7 @@ export class RahsazInitializer implements INodeType {
 		} else {
 			if (!!_ab_cdc_deleted_at) {
 				// IGNORE
-				return [[],[],[]]
+				return [[], [], []]
 			} else {
 				// INSERT
 				return [this.helpers.returnJsonArray(data), [], []];
