@@ -151,12 +151,13 @@ export class RahsazInitializer implements INodeType {
 		const _table_ = this.getNodeParameter('_table_', 0) as string;
 		const fields = this.getNodeParameter('fields', 0) as string;
 		const haveFilter = this.getNodeParameter('haveFilter', 0) as boolean;
+		const items = this.getInputData()
 
 		const keptItems: INodeExecutionData[] = [];
 		const discardedItems: INodeExecutionData[] = [];
 		if(haveFilter) {
 
-			this.getInputData().forEach((item, itemIndex) => {
+			items.forEach((item, itemIndex) => {
 				try {
 					const options = this.getNodeParameter('filter_options', itemIndex) as {
 						ignoreCase?: boolean;
@@ -199,7 +200,7 @@ export class RahsazInitializer implements INodeType {
 			});
 		}
 
-		const {Id, _ab_cdc_deleted_at, ...others} = keptItems[0].json.payload as {
+		const {Id, _ab_cdc_deleted_at, ...others} = (haveFilter ? keptItems[0] : items[0]).json.payload as {
 			Id: string,
 			_ab_cdc_deleted_at: string,
 			others: any
