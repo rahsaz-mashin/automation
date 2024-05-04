@@ -203,7 +203,7 @@ export class RahsazInitializer implements INodeType {
 		let _data: Array<any> = items
 		if(haveFilter) _data = keptItems
 
-		if(!_data?.length) return []
+		if(!_data?.length) return [[],[],[]]
 
 		const {Id, _ab_cdc_deleted_at, ...others} = _data[0].json.payload as {
 			Id: string,
