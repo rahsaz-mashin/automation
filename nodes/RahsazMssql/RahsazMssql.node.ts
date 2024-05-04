@@ -429,7 +429,7 @@ export class RahsazMssql implements INodeType {
 					})
 					Q.push(`SELECT ${fields.join(",")} FROM ${T}`)
 					r['relations_data'].map(({field, table, tField, rename_table}) => {
-						Q.push(`INNER JOIN ${table}${rename_table ? ` ${rename_table}` : ''} ON ${T}.${field} = ${rename_table ? rename_table : table}.${tField}`)
+						Q.push(`LEFT JOIN ${table}${rename_table ? ` ${rename_table}` : ''} ON ${T}.${field} = ${rename_table ? rename_table : table}.${tField}`)
 					})
 					Q.push(`WHERE ${T}.Id='${ID}'`)
 				} else {
