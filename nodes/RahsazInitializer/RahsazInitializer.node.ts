@@ -77,7 +77,7 @@ export class RahsazInitializer implements INodeType {
 				type: 'string',
 				default: '',
 				noDataExpression: false,
-				required: true,
+				required: false,
 			},
 		],
 	};
@@ -92,7 +92,11 @@ export class RahsazInitializer implements INodeType {
 		const _table_ = this.getNodeParameter('_table_', 0) as string;
 		const fields = this.getNodeParameter('fields', 0) as string;
 
-		const {Id, _ab_cdc_deleted_at, ...others} = items[0].json.payload as { Id: string, _ab_cdc_deleted_at: string, others: any }
+		const {Id, _ab_cdc_deleted_at, ...others} = items[0].json.payload as {
+			Id: string,
+			_ab_cdc_deleted_at: string,
+			others: any
+		}
 		let $r = ''
 		let $s = '*'
 		if (source === "Click") {
@@ -106,10 +110,12 @@ export class RahsazInitializer implements INodeType {
 
 		let yfields: any = {}
 		const fy = fields.split(",")
-		for (let i = 0; i < fy.length; i++) {
-			fy[i]
-			// @ts-ignore
-			yfields[fy[i]] = others[fy[i]]
+		if (!!fields) {
+			for (let i = 0; i < fy.length; i++) {
+				fy[i]
+				// @ts-ignore
+				yfields[fy[i]] = others[fy[i]]
+			}
 		}
 
 		const {db} = await initPGDB(postgresCrd)
